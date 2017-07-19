@@ -1,23 +1,25 @@
 module Emojimmy
   module Mixin
     def self.inject_methods(model, attributes)
-      attributes.each do |attribute|
-        model.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-          # Before saving the record, convert the attribute value
-          before_save do
+      model.class_eval do
+        before_save do
+          attributes.each do |attribute|
             unless respond_to?("#{attribute}=")
-              raise ArgumentError.new('#{model} must respond to #{attribute}= in order for Emojimmy to store emoji characters in it.')
+              raise ArgumentError.new(
+                "#{model} must respond to #{attribute}= in order for Emojimmy to store emoji characters in it."
+              )
             end
 
-            self.#{attribute} = Emojimmy.emoji_to_token(self.#{attribute})
+            self[attribute] = Emojimmy.emoji_to_token(self[attribute])
             true
           end
+        end
 
-          # When calling the attribute name, convert its value
-          def #{attribute}
-            Emojimmy.token_to_emoji(super)
+        attributes.each do |attribute|
+          define_method attribute do
+            Emojimmy.token_to_emoji(self[attribute])
           end
-        RUBY
+        end
       end
     end
   end
