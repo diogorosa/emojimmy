@@ -17,7 +17,7 @@ module Emojimmy
 
         attributes.each do |attribute|
           define_method attribute do
-            Emojimmy.token_to_emoji(self[attribute])
+            Emojimmy.token_to_emoji(super())
           end
         end
       end
